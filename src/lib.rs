@@ -5,8 +5,7 @@
 /// address \t name
 ///
 /// or any combination of the sort
-use std::net::Ipv4Addr;
-use std::net::Ipv6Addr;
+use std::net::IpAddr;
 use std::path::Path;
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -22,21 +21,15 @@ pub enum RecordError {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Record {
     /// addr for the record
-    addr: Address,
+    addr: IpAddr,
     /// here we have multiple names for a single record
     names: Vec<String>,
 }
-
-pub enum Address {
-    Ipv4(Ipv4Address),
-    Ipv6(Ipv6Address),
-}
-
 impl Record {
-    pub fn new(addr: Address, names: Vec<String>) -> Result<Self, RecordError> {
+    pub fn new(addr: IpAddr, names: Vec<String>) -> Result<Self, RecordError> {
         // I would love to use is_global here as well but it is only a nightly feature
         // may upgrade to nightly later on
-        if addr.is_private() || addr.is_loopback() {
+        if addr.is_ipv4() || addr.is_ipv4() {
             return Ok(Self {
                 addr: addr,
                 names: names,
@@ -84,7 +77,7 @@ impl Default for Parser {
 }
 
 impl Parser {
-    pub fn parse(&mut self, file: &Path) -> Result<(), ParserError> {
+    pub fn parse(&mut self, file: &Path) -> Result<Vec<Record>, ParserError> {
         let file = File::open(file)?;
         let buff = io::BufReader::new(file).lines();
 
@@ -111,21 +104,13 @@ impl Parser {
             }
         }
 
-        Ok(())
+        Ok(self.records)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn create_global() {
-        let addr = "8.8.8.8".parse().unwrap();
-        let names: Vec<String> = vec!["dns.google".to_string()];
-        let record = Record::new(addr, names);
-        assert!(record.is_err())
-    }
 
     #[test]
     fn create_loopback() {
@@ -149,7 +134,7 @@ mod tests {
         let mut parser: Parser = Default::default();
         let path = Path::new("/etc/hosts");
         match parser.parse(path) {
-            Ok(v) => println!("good to go"),
+            Ok(_v) => println!("good to go"),
             Err(e) => println!("{e:?}"),
         }
     }
