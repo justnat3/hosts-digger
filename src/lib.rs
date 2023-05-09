@@ -29,7 +29,7 @@ impl Record {
     pub fn new(addr: IpAddr, names: Vec<String>) -> Result<Self, RecordError> {
         // I would love to use is_global here as well but it is only a nightly feature
         // may upgrade to nightly later on
-        if addr.is_ipv4() || addr.is_ipv4() {
+        if addr.is_ipv4() || addr.is_ipv6() {
             return Ok(Self {
                 addr: addr,
                 names: names,
