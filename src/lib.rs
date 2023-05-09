@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::io::{self, BufRead};
 /// the etc/hosts file is used to statically define local dns records
 /// the format of this file is quite simple
 ///
@@ -7,8 +9,6 @@
 /// or any combination of the sort
 use std::net::IpAddr;
 use std::path::Path;
-use std::fs::File;
-use std::io::{self, BufRead};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -66,13 +66,17 @@ pub enum Part {
 struct Parser {
     line: i64,
     part: Part,
-    records: Vec<Record>
+    records: Vec<Record>,
 }
 
 impl Default for Parser {
     fn default() -> Parser {
         let records: Vec<Record> = Vec::new();
-        Parser {line: 0, part: Part::Unknown, records: records}
+        Parser {
+            line: 0,
+            part: Part::Unknown,
+            records: records,
+        }
     }
 }
 
@@ -85,18 +89,26 @@ impl Parser {
 
         for line in buff {
             if let Ok(a) = line {
-                if a.is_empty() { continue; }
-                if a.starts_with('#') { continue; }
+                if a.is_empty() {
+                    continue;
+                }
+                if a.starts_with('#') {
+                    continue;
+                }
                 // dont worry about tabs, gersh darnit
                 let a = a.replace("\t", " ");
 
-                let mut record_info =
-                    a.split(' ').filter(|&s| !s.is_empty()).collect::<Vec<&str>>();
+                let mut record_info = a
+                    .split(' ')
+                    .filter(|&s| !s.is_empty())
+                    .collect::<Vec<&str>>();
 
                 let name = record_info.remove(0).to_string();
 
-                let addrs =
-                    record_info.iter().map(|&s| s.to_string()).collect::<Vec<String>>();
+                let addrs = record_info
+                    .iter()
+                    .map(|&s| s.to_string())
+                    .collect::<Vec<String>>();
 
                 if let Ok(record) = Record::new(name.parse()?, addrs) {
                     self.records.push(record);
