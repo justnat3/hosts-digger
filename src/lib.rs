@@ -18,7 +18,7 @@ pub enum RecordError {
 }
 
 /// Record is a way of representing a single entry in the hosts files
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Record {
     /// addr for the record
     addr: IpAddr,
@@ -77,7 +77,7 @@ impl Default for Parser {
 }
 
 impl Parser {
-    pub fn parse(&mut self, file: &Path) -> Result<Vec<Record>, ParserError> {
+    pub fn parse(&mut self, file: &Path) -> Result<&Vec<Record>, ParserError> {
         let file = File::open(file)?;
         let buff = io::BufReader::new(file).lines();
 
@@ -104,7 +104,7 @@ impl Parser {
             }
         }
 
-        Ok(self.records)
+        Ok(&self.records)
     }
 }
 
