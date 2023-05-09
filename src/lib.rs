@@ -1,5 +1,3 @@
-use std::fs::File;
-use std::io::{self, BufRead};
 /// the etc/hosts file is used to statically define local dns records
 /// the format of this file is quite simple
 ///
@@ -7,6 +5,9 @@ use std::io::{self, BufRead};
 /// address \t name
 ///
 /// or any combination of the sort
+
+use std::fs::File;
+use std::io::{self, BufRead};
 use std::net::IpAddr;
 use std::path::Path;
 use thiserror::Error;
@@ -51,16 +52,6 @@ pub enum ParserError {
     #[error("unknown")]
     Unknown(String),
 }
-
-#[derive(Debug, Default)]
-pub enum Part {
-    Addr,
-    Names,
-    Comment,
-    #[default]
-    Unknown,
-}
-
 /// Parser is a way we can extract Records from the etc/hosts file
 #[derive(Debug)]
 struct Parser {
@@ -84,8 +75,6 @@ impl Parser {
     pub fn parse(&mut self, file: &Path) -> Result<&Vec<Record>, ParserError> {
         let file = File::open(file)?;
         let buff = io::BufReader::new(file).lines();
-
-        self.part = Part::Names;
 
         for line in buff {
             if let Ok(a) = line {
