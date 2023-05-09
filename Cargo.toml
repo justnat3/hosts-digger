@@ -1,5 +1,5 @@
 [package]
-name = "hosts_parser"
+name = "etchosts_parser"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
