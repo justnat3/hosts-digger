@@ -56,7 +56,6 @@ pub enum ParserError {
 #[derive(Debug)]
 struct Parser {
     line: i64,
-    part: Part,
     records: Vec<Record>,
 }
 
@@ -65,7 +64,6 @@ impl Default for Parser {
         let records: Vec<Record> = Vec::new();
         Parser {
             line: 0,
-            part: Part::Unknown,
             records: records,
         }
     }
